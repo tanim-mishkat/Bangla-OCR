@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Secrets
+.env
+
+# Data: versioned on Hugging Face, not in Git
+data/**
+!data/**/
+!data/**/.gitkeep
+*.parquet
+
+# Notebooks / OS / editors
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+.vscode/
