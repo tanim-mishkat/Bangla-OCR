@@ -10,7 +10,7 @@ def is_bangla_char(ch: str) -> bool:
     Raises ValueError if `ch` is not exactly one character.
     """
     if len(ch) != 1:
-        raise ValueError("Expected one character")
+        raise ValueError(f"Expected one character, got {len(ch)}: {ch!r}")
 
     return BANGLA_START <= ord(ch) <= BANGLA_END
 
