@@ -7,7 +7,11 @@ authors = [
     { name = "tanim-mishkat", email = "t5mishkat@gmail.com" }
 ]
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "numpy>=2.5.3",
+    "pillow>=12.3.0",
+    "polars>=2.0.0",
+]
 
 [build-system]
 requires = ["uv_build>=0.12.23,<0.13.0"]

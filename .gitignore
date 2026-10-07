@@ -6,6 +6,9 @@ __pycache__/
 .ruff_cache/
 *.egg-info/
 
+# Downloaded binaries (scripts/get_fribidi.ps1)
+tools/
+
 # Secrets
 .env
 
