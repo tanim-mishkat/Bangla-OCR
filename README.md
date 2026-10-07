@@ -24,6 +24,7 @@ Requires [uv](https://docs.astral.sh/uv/).
 uv sync              # create .venv and install exact locked versions
 uv run pytest        # run tests
 uv run ruff check .  # lint
+uv run ruff format . # format
 ```
 
 Copy `.env.example` to `.env` and fill in API keys (never commit `.env`).
