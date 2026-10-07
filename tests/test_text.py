@@ -7,18 +7,18 @@ from bangla_ocr.text import bangla_ratio, is_bangla_char
     "ch, expected",
     [
         ("\u097f", False),  # just before Bengali block
-        ("\u0980", True),   # first character in Bengali block
-        ("\u09ff", True),   # last character in Bengali block
+        ("\u0980", True),  # first character in Bengali block
+        ("\u09ff", True),  # last character in Bengali block
         ("\u0a00", False),  # just after Bengali block
-        ("ক", True),         # consonant KA
-        ("অ", True),         # vowel A
-        ("৫", True),         # Bangla digit 5
-        ("া", True),         # vowel sign AA
-        ("্", True),         # hasant / virama
+        ("ক", True),  # consonant KA
+        ("অ", True),  # vowel A
+        ("৫", True),  # Bangla digit 5
+        ("া", True),  # vowel sign AA
+        ("্", True),  # hasant / virama
         ("a", False),
-        ("5", False),        # ASCII digit
+        ("5", False),  # ASCII digit
         (" ", False),
-        ("।", False),        # danda is U+0964, outside Bengali block
+        ("।", False),  # danda is U+0964, outside Bengali block
     ],
 )
 def test_is_bangla_char(ch, expected):
