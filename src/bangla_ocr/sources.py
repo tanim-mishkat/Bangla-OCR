@@ -24,3 +24,59 @@ REID2019 = Source(
         "British Library; 2020. Version 2. https://doi.org/10.23636/1168"
     ),
 )
+
+_WIKI_REV = "b04c8d1ceb2f5cd4588862100d08de323dccfbaa"
+WIKI_BN = Source(
+    name="wiki_bn",
+    url=(
+        f"https://huggingface.co/datasets/wikimedia/wikipedia/resolve/{_WIKI_REV}"
+        "/20231101.bn/train-00001-of-00002.parquet"
+    ),
+    filename="wiki_bn/train-00001-of-00002.parquet",
+    sha256="47c0095c58d6595f68d4bccc257ae6646f27a4669a7d259369c11626bd39565a",
+    licence="CC BY-SA 3.0",
+    citation="Bangla Wikipedia (2023-11-01 dump) via huggingface.co/datasets/wikimedia/wikipedia",
+)
+
+_FONTS_REV = "7085eb89a950e85db5b166b7a58d414544b4140c"
+_FONTS_URL = f"https://raw.githubusercontent.com/google/fonts/{_FONTS_REV}/ofl/"
+
+
+def _font(name: str, path: str, sha256: str) -> Source:
+    return Source(
+        name=name,
+        url=_FONTS_URL + path,
+        filename=f"fonts/{name}.ttf",
+        sha256=sha256,
+        licence="OFL-1.1",
+        citation=f"{name}, Google Fonts (github.com/google/fonts)",
+    )
+
+
+FONTS = (
+    _font(
+        "NotoSansBengali",
+        "notosansbengali/NotoSansBengali%5Bwdth,wght%5D.ttf",
+        "dcd42978094e584a849c84a51450eeac40c8826057d566ea6d4b9627a403a05a",
+    ),
+    _font(
+        "NotoSerifBengali",
+        "notoserifbengali/NotoSerifBengali%5Bwdth,wght%5D.ttf",
+        "083180a7b47cf3b101ed55a8724aa1b38869daa9baf23b7cf198f9d225365aba",
+    ),
+    _font(
+        "HindSiliguri",
+        "hindsiliguri/HindSiliguri-Regular.ttf",
+        "45071a7da902a74877f432722f525d00502d61aef71fca4cab3da8a23156c33d",
+    ),
+    _font(
+        "TiroBangla",
+        "tirobangla/TiroBangla-Regular.ttf",
+        "a763523dc3f90a71962cb8d9400b8f0a86b40b2cb01676f165101a2967127ae4",
+    ),
+    _font(
+        "Galada",
+        "galada/Galada-Regular.ttf",
+        "acc22b41ee470dc542e15b5f8907c7fbebef1b9c01eb20e4127bdbf052b006ee",
+    ),
+)

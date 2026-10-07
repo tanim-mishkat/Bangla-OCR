@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 2 - Ingest: **in progress** (steps 1-3 of 7 done). Next: step 4 (fonts + source text).
+Phase 2 - Ingest: **in progress** (steps 1-4 of 7 done). Next: step 5 (synthetic render + augment).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -23,7 +23,7 @@ Phase 2 - Ingest: **in progress** (steps 1-3 of 7 done). Next: step 4 (fonts + s
 - [x] Step 1: polars/pillow/numpy; FriBiDi DLL (`scripts/get_fribidi.ps1`) + `ensure_raqm()` guard
 - [x] Step 2: REID2019 download, streaming + pinned sha256 (`bangla_ocr.download`)
 - [x] Step 3: PAGE XML -> region crops -> `data/interim/reid2019/*.parquet` (1264 rows)
-- [ ] Step 4: fonts + Bangla source text
+- [x] Step 4: 5 OFL fonts + Bangla Wikipedia shard (pinned) -> `data/interim/corpus.parquet` (3000 lines)
 - [ ] Step 5: synthetic render + augment (I write `augment`)
 - [ ] Step 6: combine to `data/interim/ingested.parquet` + schema test (I write row check)
 - [ ] Step 7: README licences + quiz
@@ -35,6 +35,10 @@ Phase 2 - Ingest: **in progress** (steps 1-3 of 7 done). Next: step 4 (fonts + s
   Kept in interim; Phase 3 drops + reports them. 677 usable.
 - Windows Pillow needs FriBiDi for raqm; it is looked up once when PIL.ImageDraw is imported,
   so `bangla_ocr/__init__.py` sets PATH first.
+- Corpus: 3000 lines, median 35 chars, 505 with Bangla digits. Hidden chars: ZWNJ 3, ZWJ 5, NBSP 9
+  -> Phase 3 normalisation must decide on these (they change CER while looking identical).
+- Wikipedia is CC BY-SA -> synthetic subset (and published dataset) must be CC BY-SA.
+- Same line rendered in 5 fonts -> Phase 3 split must group by `text_id` (leakage).
 
 ## Struggled with / learned
 - Testing boundaries: first tests missed U+0980/U+09FF edges; `<` vs `<=` bug passed silently.

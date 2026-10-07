@@ -5,7 +5,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-from bangla_ocr.sources import REID2019, Source
+from bangla_ocr.sources import FONTS, REID2019, WIKI_BN, Source
 
 CHUNK = 1 << 20  # 1 MiB
 RAW_DIR = Path("data/raw")
@@ -45,18 +45,24 @@ def download(url: str, dest: Path, sha256: str | None = None) -> str:
 
 
 def fetch(source: Source, raw_dir: Path = RAW_DIR) -> Path:
-    """Download and unzip `source` into raw_dir/<name>/. Returns the extract dir."""
-    archive = raw_dir / source.filename
-    digest = download(source.url, archive, source.sha256)
+    """Download `source` into raw_dir. Zips are extracted to raw_dir/<name>/.
+
+    Returns the extract dir for zips, else the downloaded file.
+    """
+    path = raw_dir / source.filename
+    digest = download(source.url, path, source.sha256)
     if source.sha256 is None:
         print(f"Not pinned yet. Set sha256 for {source.name} in sources.py:\n  {digest}")
+    if path.suffix != ".zip":
+        return path
 
     out = raw_dir / source.name
     if not out.exists():
-        with zipfile.ZipFile(archive) as zf:
+        with zipfile.ZipFile(path) as zf:
             zf.extractall(out)
     return out
 
 
 if __name__ == "__main__":
-    print(f"Extracted to {fetch(REID2019)}")
+    for src in (REID2019, WIKI_BN, *FONTS):
+        print(f"{src.name}: {fetch(src)}")
