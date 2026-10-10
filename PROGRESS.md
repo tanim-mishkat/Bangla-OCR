@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 2 - Ingest: **in progress** (steps 1-4 of 7 done). Next: step 5 (synthetic render + augment).
+Phase 2 - Ingest: **in progress** (steps 1-5 of 7 done). Next: step 6 (combine + schema test; I write the row check).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -24,7 +24,7 @@ Phase 2 - Ingest: **in progress** (steps 1-4 of 7 done). Next: step 5 (synthetic
 - [x] Step 2: REID2019 download, streaming + pinned sha256 (`bangla_ocr.download`)
 - [x] Step 3: PAGE XML -> region crops -> `data/interim/reid2019/*.parquet` (1264 rows)
 - [x] Step 4: 5 OFL fonts + Bangla Wikipedia shard (pinned) -> `data/interim/corpus.parquet` (3000 lines)
-- [ ] Step 5: synthetic render + augment (I write `augment`)
+- [x] Step 5: raqm render x 5 fonts + `augment` (written by me) -> `data/interim/synth/` (14984 imgs, 221 MB)
 - [ ] Step 6: combine to `data/interim/ingested.parquet` + schema test (I write row check)
 - [ ] Step 7: README licences + quiz
 
@@ -39,10 +39,14 @@ Phase 2 - Ingest: **in progress** (steps 1-4 of 7 done). Next: step 5 (synthetic
   -> Phase 3 normalisation must decide on these (they change CER while looking identical).
 - Wikipedia is CC BY-SA -> synthetic subset (and published dataset) must be CC BY-SA.
 - Same line rendered in 5 fonts -> Phase 3 split must group by `text_id` (leakage).
+- 16 line-font pairs skipped: font lacks glyph (U+FDFA, ≠, −, ★, ć) -> would render tofu with a correct label.
+- Levels ~1/3 each (clean/mild/heavy); heavy still human-readable (eyeballed).
+- Noisy PNGs barely compress (noise is random): 221 MB, kept lossless (JPEG adds a hidden 2nd variable).
 
 ## Struggled with / learned
 - Testing boundaries: first tests missed U+0980/U+09FF edges; `<` vs `<=` bug passed silently.
 - Tests must use hard-coded expected values, not the code's own constants.
+- `augment` passed all tests but returned the input object + aliased rotation: tests only prove what they check.
 - Test both sides of an edge (just inside and just outside).
 - Reproducibility gaps to remember: system tools (Tesseract) aren't in `uv.lock`;
   Unicode normalisation changes CER; save raw model outputs so scoring is re-runnable.
@@ -50,6 +54,8 @@ Phase 2 - Ingest: **in progress** (steps 1-4 of 7 done). Next: step 5 (synthetic
 ## Habits
 - Before commit: `uv run ruff format . ; uv run ruff check . ; uv run pytest`
 - Always `open(path, encoding="utf-8")` on Windows.
+- Long `python -c` one-liners break in PowerShell (quotes/braces) -> put them in `scripts/`.
+- After each commit: `git push`.
 
 ## Next
 - Phase 2 intro: what ingest means, Parquet, licences, synthetic rendering.

@@ -1,9 +1,12 @@
+import io
+
 import numpy as np
+import polars as pl
 import pytest
 from PIL import Image, ImageFont
 
 from bangla_ocr.shaping import ensure_raqm
-from bangla_ocr.synth import FONT_DIR, PAD, augment, render_line
+from bangla_ocr.synth import FONT_DIR, PAD, augment, build, has_glyphs, render_line
 
 NOTO = FONT_DIR / "NotoSansBengali.ttf"
 needs_fonts = pytest.mark.skipif(not NOTO.exists(), reason="run bangla_ocr.download first")
@@ -89,3 +92,47 @@ def test_noise_is_reproducible_from_seed(block):
     c = augment(block, np.random.default_rng(8), noise=25)
     assert a.tobytes() == b.tobytes()
     assert a.tobytes() != c.tobytes()
+
+
+# --- glyph coverage + build ---
+
+
+@needs_fonts
+def test_has_glyphs():
+    assert has_glyphs("আমার সোনার বাংলা ১৯৭১", NOTO)
+    assert not has_glyphs("তারা ★", NOTO)  # U+2605 not in Noto Sans Bengali
+
+
+@pytest.fixture
+def corpus(tmp_path):
+    path = tmp_path / "corpus.parquet"
+    pl.DataFrame(
+        {
+            "text_id": ["t/0", "t/1", "t/2"],
+            "text": ["আমি ভাত খাই।", "তারা ★", "কিন্তু ক্ষমা"],
+        }
+    ).write_parquet(path)
+    return path
+
+
+@needs_fonts
+def test_build_writes_chunks_and_skips_missing_glyphs(corpus, tmp_path):
+    out = tmp_path / "synth"
+    skipped = build(corpus, out, fonts={"noto": NOTO}, chunk_lines=2)
+    df = pl.read_parquet(out / "*.parquet")
+    assert sorted(p.name for p in out.iterdir()) == ["part-00000.parquet", "part-00001.parquet"]
+    assert skipped == 1
+    assert df["id"].to_list() == ["synth/t/0/noto", "synth/t/2/noto"]
+    assert set(df["level"]) <= {"clean", "mild", "heavy"}
+    assert set(df["licence"]) == {"CC BY-SA 3.0"}
+    img = Image.open(io.BytesIO(df["image"][0]))
+    assert img.size == (df["width"][0], df["height"][0])
+
+
+@needs_fonts
+def test_build_is_deterministic(corpus, tmp_path):
+    build(corpus, tmp_path / "a", fonts={"noto": NOTO}, chunk_lines=2)
+    build(corpus, tmp_path / "b", fonts={"noto": NOTO}, chunk_lines=3)  # chunking must not matter
+    a = pl.read_parquet(tmp_path / "a" / "*.parquet")
+    b = pl.read_parquet(tmp_path / "b" / "*.parquet")
+    assert a.equals(b)
