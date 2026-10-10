@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 2 - Ingest: **in progress** (steps 1-5 of 7 done). Next: step 6 (combine + schema test; I write the row check).
+Phase 2 - Ingest: **in progress** (steps 1-6 of 7 done). Next: step 7 (README licences + Phase 2 quiz).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -25,7 +25,7 @@ Phase 2 - Ingest: **in progress** (steps 1-5 of 7 done). Next: step 6 (combine +
 - [x] Step 3: PAGE XML -> region crops -> `data/interim/reid2019/*.parquet` (1264 rows)
 - [x] Step 4: 5 OFL fonts + Bangla Wikipedia shard (pinned) -> `data/interim/corpus.parquet` (3000 lines)
 - [x] Step 5: raqm render x 5 fonts + `augment` (written by me) -> `data/interim/synth/` (14984 imgs, 221 MB)
-- [ ] Step 6: combine to `data/interim/ingested.parquet` + schema test (I write row check)
+- [x] Step 6: `data/interim/ingested.parquet` (1264 reid + 14984 synth), `check_row` written by me, 0 bad rows
 - [ ] Step 7: README licences + quiz
 
 ### Data findings (for the write-up)
@@ -47,6 +47,8 @@ Phase 2 - Ingest: **in progress** (steps 1-5 of 7 done). Next: step 6 (combine +
 - Testing boundaries: first tests missed U+0980/U+09FF edges; `<` vs `<=` bug passed silently.
 - Tests must use hard-coded expected values, not the code's own constants.
 - `augment` passed all tests but returned the input object + aliased rotation: tests only prove what they check.
+- Validators return a list of reasons, not a bool: per-check counts point at the bug.
+- Each parametrised bad-row case must contain exactly one fault (test data bug caught by a reference impl).
 - Test both sides of an edge (just inside and just outside).
 - Reproducibility gaps to remember: system tools (Tesseract) aren't in `uv.lock`;
   Unicode normalisation changes CER; save raw model outputs so scoring is re-runnable.
