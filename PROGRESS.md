@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 2 - Ingest: **in progress** (steps 1-6 of 7 done). Next: step 7 (README licences + Phase 2 quiz).
+Phase 3 - Clean & validate: **not started** (Phase 2 complete). Next: Phase 3 intro.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -26,7 +26,10 @@ Phase 2 - Ingest: **in progress** (steps 1-6 of 7 done). Next: step 7 (README li
 - [x] Step 4: 5 OFL fonts + Bangla Wikipedia shard (pinned) -> `data/interim/corpus.parquet` (3000 lines)
 - [x] Step 5: raqm render x 5 fonts + `augment` (written by me) -> `data/interim/synth/` (14984 imgs, 221 MB)
 - [x] Step 6: `data/interim/ingested.parquet` (1264 reid + 14984 synth), `check_row` written by me, 0 bad rows
-- [ ] Step 7: README licences + quiz
+- [x] Step 7: README build commands + licence table (ShareAlike on synth subset)
+- [x] Quiz: 3/3 correct (leakage direction, per-sample seeding, tofu = data bug in CER).
+  Interview (new-source checks): strong; add eyeballing a sample, distribution comparison,
+  and naming the gate (Dagster asset check / CI) + per-reason counts.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -50,6 +53,8 @@ Phase 2 - Ingest: **in progress** (steps 1-6 of 7 done). Next: step 7 (README li
 - Validators return a list of reasons, not a bool: per-check counts point at the bug.
 - Each parametrised bad-row case must contain exactly one fault (test data bug caught by a reference impl).
 - Test both sides of an edge (just inside and just outside).
+- Shared RNG breaks on skips too: a skipped sample consumes no draws, shifting all later ones.
+- Biased bugs (tofu only in some fonts/rare chars) land in exactly the slices the eval breaks down.
 - Reproducibility gaps to remember: system tools (Tesseract) aren't in `uv.lock`;
   Unicode normalisation changes CER; save raw model outputs so scoring is re-runnable.
 
@@ -60,5 +65,5 @@ Phase 2 - Ingest: **in progress** (steps 1-6 of 7 done). Next: step 7 (README li
 - After each commit: `git push`.
 
 ## Next
-- Phase 2 intro: what ingest means, Parquet, licences, synthetic rendering.
-- Find and verify a public Bangla OCR dataset with a reuse-friendly licence.
+- Phase 3: drop + count empty REID texts; NFC + ZWNJ/ZWJ/NBSP policy; dedupe;
+  split grouped by `text_id` (REID = test only); tests that fail on bad data.
