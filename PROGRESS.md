@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 3 - Clean & validate: **in progress**. Next: Phase 3 quiz.
+Phase 3 - Clean & validate: **done**. Next: Phase 4 (Dagster + Hugging Face) intro; needs HF account.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -38,6 +38,9 @@ Phase 3 - Clean & validate: **in progress**. Next: Phase 3 quiz.
   train 11920 / val 1495 / test 2246 (677 reid + 1569 synth); synth 79.6/10.0/10.5%
 - [x] Step 4: `tests/test_data.py` (9 checks on real output, skipped if not built; each proven to fail
   on corrupted data) + `scripts/data_summary.py`
+- [x] Quiz: 3/3 correct (ZWJ blocks NFC composition; hash split stable + `hash()` salted;
+  dedupe key per source). Interview (3% CER vs prod): strong; add line crops vs full pages
+  (segmentation untested) and that blended CER is mostly synth.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -73,7 +76,7 @@ Phase 3 - Clean & validate: **in progress**. Next: Phase 3 quiz.
   Unicode normalisation changes CER; save raw model outputs so scoring is re-runnable.
 
 - Dedupe key follows the reason: text for leakage (synth), image bytes for true duplicates (REID).
-- Invisible chars in source code: write as `‍` escapes, never literals (unreviewable).
+- Invisible chars in source code: write as `\u200d` escapes, never literals (unreviewable).
 
 - `map_elements` skips nulls: a guard inside the function never fires for them -> check nulls outside.
 - Hash split, not shuffle: stable when data is added; never Python `hash()` (per-process salt).
@@ -85,5 +88,5 @@ Phase 3 - Clean & validate: **in progress**. Next: Phase 3 quiz.
 - After each commit: `git push`.
 
 ## Next
-- Phase 3: drop + count empty REID texts; NFC + ZWNJ/ZWJ/NBSP policy; dedupe;
-  split grouped by `text_id` (REID = test only); tests that fail on bad data.
+- Phase 4: Dagster assets (ingest -> clean -> split) + asset checks from `tests/test_data.py`;
+  publish splits to Hugging Face (CC BY-SA dataset card).
