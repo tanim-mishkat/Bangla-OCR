@@ -13,6 +13,17 @@ from bangla_ocr.download import sha256_file
 REPO_NAME = "bangla-ocr-bench"
 RECORD_PATH = split.OUT_DIR / "published.json"
 
+# The only dataset version Phase 5 evaluates against (code 5956651). Change = new benchmark version.
+PINNED = {
+    "repo_id": "codemishkat/bangla-ocr-bench",
+    "revision": "94f402102cc9c2dd4007de28a3fa9f00fad3c3eb",
+    "sha256": {
+        "train": "2c5ec49f082b28d616ead2c0661d9dea22e1edcd8387c3d784e1de8d7109a23c",
+        "val": "de5f34830e3ce7f258dd5a03192e8386aa54acce9aaec7ce3eca536100d47eaa",
+        "test": "d64c9e27c8aee08bef5560d96264555cbb5b33c93fd308f27b8946fed30d24af",
+    },
+}
+
 
 def code_revision() -> str:
     """Short git commit of the code, with '-dirty' if there are uncommitted changes."""

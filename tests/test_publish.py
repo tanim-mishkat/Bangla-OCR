@@ -1,4 +1,5 @@
 import json
+import re
 from types import SimpleNamespace
 
 import polars as pl
@@ -90,6 +91,11 @@ def test_verify_compares_hub_lfs_hashes():
             return [SimpleNamespace(path=p, lfs=SimpleNamespace(sha256=lfs[p])) for p in paths]
 
     assert publish.verify(Api(), record) == ["data/val.parquet: hub XX, local bb"]
+
+
+def test_pinned_is_a_full_commit_with_every_split():
+    assert re.fullmatch(r"[0-9a-f]{40}", publish.PINNED["revision"])  # a branch name would move
+    assert set(publish.PINNED["sha256"]) == {"train", "val", "test"}
 
 
 def test_split_counts(built):

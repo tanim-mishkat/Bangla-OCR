@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 3 live publish (materialise `hf_dataset`), then quiz.
+Phase 4 - Dagster + Hugging Face: **in progress**. Next: quiz.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -49,6 +49,11 @@ Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 3 live publish (ma
   blocking Dagster asset checks; `share_problems` written by me; blocking proven by test + mutation
 - [x] Step 3 (code): `card.py` (`split_table` written by me) + `publish.py` (one atomic HF commit,
   refuses dirty code, private) + `hf_dataset` asset gated by the checks; fake-Hub tests
+- [x] Step 3 (live): private `codemishkat/bangla-ocr-bench`. My review -> 2 fixes: card states exact
+  split algorithm + bucket ranges; `publish()` re-runs the contract itself (materialising
+  `hf_dataset` alone can no longer skip checks). Hub LFS sha256 == local (`publish.verify`).
+- [x] Step 4: pinned `publish.PINNED` = revision `94f4021` (code `5956651`); data test fails if
+  local splits drift from it. Phase 5 evaluates only this revision.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -97,5 +102,5 @@ Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 3 live publish (ma
 - After each commit: `git push`.
 
 ## Next
-- Phase 4: Dagster assets (ingest -> clean -> split) + asset checks from `tests/test_data.py`;
-  publish splits to Hugging Face (CC BY-SA dataset card).
+- Phase 4 quiz, then Phase 5: eval harness on `PINNED` (Tesseract, EasyOCR, vision LLMs; CER/WER,
+  bootstrap CIs by `text_id`, error breakdowns, REID reported separately).
