@@ -23,3 +23,6 @@ data/**
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Dagster local instance
+.tmp_dagster_home_*/

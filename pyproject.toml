@@ -8,6 +8,7 @@ authors = [
 ]
 requires-python = ">=3.12"
 dependencies = [
+    "dagster>=1.13.26",
     "fonttools>=4.66.1",
     "numpy>=2.5.3",
     "pillow>=12.3.0",
@@ -29,6 +30,7 @@ select = ["E", "F", "I", "B", "UP"]
 
 [dependency-groups]
 dev = [
+    "dagster-webserver>=1.13.26",
     "pytest>=9.1.1",
     "ruff>=0.16.10",
 ]

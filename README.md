@@ -31,7 +31,13 @@ Copy `.env.example` to `.env` and fill in API keys (never commit `.env`).
 
 ## Build the data
 
-Each step reads the previous step's output and skips work already done.
+The whole pipeline is a Dagster asset graph (`src/bangla_ocr/defs.py`). From the repo root:
+
+```powershell
+uv run dagster dev -m bangla_ocr.defs   # UI at http://localhost:3000 -> Materialize all
+```
+
+Or run the steps by hand. Each step reads the previous step's output and skips work already done.
 
 ```powershell
 .\scripts\get_fribidi.ps1                 # Windows only: FriBiDi DLL for Bangla text shaping

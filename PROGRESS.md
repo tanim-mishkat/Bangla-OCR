@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 3 - Clean & validate: **done**. Next: Phase 4 (Dagster + Hugging Face) intro; needs HF account.
+Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 2 (asset checks).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -41,6 +41,10 @@ Phase 3 - Clean & validate: **done**. Next: Phase 4 (Dagster + Hugging Face) int
 - [x] Quiz: 3/3 correct (ZWJ blocks NFC composition; hash split stable + `hash()` salted;
   dedupe key per source). Interview (3% CER vs prod): strong; add line crops vs full pages
   (segmentation untested) and that blended CER is mostly synth.
+
+### Phase 4
+- [x] Step 1: Dagster assets wrap each build step (`defs.py`), metadata per run; graph test;
+  full CLI materialise = identical outputs (~1m45s with caches)
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
