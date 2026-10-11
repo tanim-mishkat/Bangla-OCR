@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 3 - Clean & validate: **not started** (Phase 2 complete). Next: Phase 3 intro.
+Phase 3 - Clean & validate: **in progress**. Next: step 3 (`assign_split`).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -31,6 +31,10 @@ Phase 3 - Clean & validate: **not started** (Phase 2 complete). Next: Phase 3 in
   Interview (new-source checks): strong; add eyeballing a sample, distribution comparison,
   and naming the gate (Dagster asset check / CI) + per-reason counts.
 
+### Phase 3
+- [x] Step 1: `normalise_text` (written by me): drop ZWSP/ZWNJ/ZWJ/BOM -> collapse whitespace -> NFC
+- [x] Step 2: `clean.py` -> `data/interim/clean.parquet` (15661 = 677 reid + 14984 synth) + `clean_report.json`
+
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
 - Ground truth is region-level, not line-level -> real data = test-only "historical print" slice.
@@ -43,6 +47,9 @@ Phase 3 - Clean & validate: **not started** (Phase 2 complete). Next: Phase 3 in
 - Wikipedia is CC BY-SA -> synthetic subset (and published dataset) must be CC BY-SA.
 - Same line rendered in 5 fonts -> Phase 3 split must group by `text_id` (leakage).
 - 16 line-font pairs skipped: font lacks glyph (U+FDFA, ≠, −, ★, ć) -> would render tofu with a correct label.
+- Clean: only drops = 587 empty REID. 76 REID rows share text with another (mostly page numbers)
+  but are distinct images -> kept (REID is test-only, cannot leak); dedupe REID by image bytes.
+  115/677 REID regions are page numbers -> Phase 5 CER by `region_type`.
 - Levels ~1/3 each (clean/mild/heavy); heavy still human-readable (eyeballed).
 - Noisy PNGs barely compress (noise is random): 221 MB, kept lossless (JPEG adds a hidden 2nd variable).
 
@@ -57,6 +64,9 @@ Phase 3 - Clean & validate: **not started** (Phase 2 complete). Next: Phase 3 in
 - Biased bugs (tofu only in some fonts/rare chars) land in exactly the slices the eval breaks down.
 - Reproducibility gaps to remember: system tools (Tesseract) aren't in `uv.lock`;
   Unicode normalisation changes CER; save raw model outputs so scoring is re-runnable.
+
+- Dedupe key follows the reason: text for leakage (synth), image bytes for true duplicates (REID).
+- Invisible chars in source code: write as `‍` escapes, never literals (unreviewable).
 
 ## Habits
 - Before commit: `uv run ruff format . ; uv run ruff check . ; uv run pytest`
