@@ -3,7 +3,7 @@
 import unicodedata
 
 # Format characters an OCR system cannot see, so cannot be expected to output.
-INVISIBLE = {"​", "‌", "‍", "﻿"}  # ZWSP, ZWNJ, ZWJ, BOM
+INVISIBLE = {"\u200b", "\u200c", "\u200d", "\ufeff"}  # ZWSP, ZWNJ, ZWJ, BOM
 
 
 def normalise_text(text: str) -> str:
