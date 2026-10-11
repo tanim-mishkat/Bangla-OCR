@@ -1,6 +1,7 @@
 """Hugging Face dataset card (README.md) built from the pipeline's own numbers."""
 
 from bangla_ocr.sources import REID2019, WIKI_BN
+from bangla_ocr.split import TRAIN_PCT, VAL_PCT
 
 HF_SPLIT = {"train": "train", "val": "validation", "test": "test"}  # HF naming convention
 
@@ -54,6 +55,7 @@ def render(
     )
     drops = "\n".join(f"| {k} | {v} |" for k, v in report.items())
     checksums = "\n".join(f"| `data/{name}.parquet` | `{h}` |" for name, h in sha256.items())
+    t, v = TRAIN_PCT, VAL_PCT
     return f"""---
 license: cc-by-sa-3.0
 language:
@@ -84,8 +86,10 @@ test split only). Built by a reproducible pipeline: code revision `{code_revisio
 
 {split_table(counts)}
 
-- **Synthetic**: split by `sha256(text_id) % 100` (80/10/10). All renders of one line share
-  a split, so no text appears in two splits. Stable when data is added.
+- **Synthetic**: split by `text_id`. Bucket = first 8 bytes of `sha256(text_id.encode("utf-8"))`
+  as a big-endian unsigned integer, `% 100`; buckets 0-{t - 1} train, {t}-{t + v - 1} validation,
+  {t + v}-99 test. All renders of one line share a split, so no text appears in two splits.
+  Stable when data is added.
 - **REID2019**: test only. Its ground truth is region-level, so it is a separate
   "real historical print" slice. **Report it separately from synthetic.**
 - Test synthetic has ~5 images per unique text: bootstrap CIs by `text_id`, not by image.

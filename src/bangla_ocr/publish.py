@@ -45,6 +45,10 @@ def publish(
         raise RuntimeError(
             "Commit your code first: the card must name the code that built the data"
         )
+    # Re-run the contract on the exact files being uploaded, whatever the caller checked before
+    failed = sorted(name for name, problems in checks.run(out_dir, report_path).items() if problems)
+    if failed:
+        raise RuntimeError(f"Data contract failed, not publishing: {failed}")
     paths = checks.split_paths(out_dir)
     sha256 = {name: sha256_file(p) for name, p in paths.items()}
     report = json.loads(report_path.read_text(encoding="utf-8"))
@@ -57,3 +61,13 @@ def publish(
         repo_id, operations=ops, commit_message=f"Publish (code {rev})", repo_type="dataset"
     )
     return {"repo_id": repo_id, "revision": info.oid, "code_revision": rev, "sha256": sha256}
+
+
+def verify(api: HfApi, record: dict) -> list[str]:
+    """Hub LFS sha256 of each split at the pinned revision vs the record. Empty = match."""
+    paths = {f"data/{name}.parquet": h for name, h in record["sha256"].items()}
+    infos = api.get_paths_info(
+        record["repo_id"], list(paths), revision=record["revision"], repo_type="dataset"
+    )
+    hub = {i.path: i.lfs.sha256 if i.lfs else None for i in infos}
+    return [f"{p}: hub {hub.get(p)}, local {h}" for p, h in paths.items() if hub.get(p) != h]

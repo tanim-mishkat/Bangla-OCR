@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import polars as pl
 import pytest
 
-from bangla_ocr import card, publish
+from bangla_ocr import card, checks, publish
 
 
 class FakeApi:
@@ -24,6 +24,7 @@ class FakeApi:
 @pytest.fixture
 def built(tmp_path, monkeypatch):
     monkeypatch.setattr(card, "split_table", lambda counts: "TABLE")  # tested in test_card
+    monkeypatch.setattr(checks, "run", lambda *a: {n: [] for n in checks.NAMES})  # all pass
     out = tmp_path / "processed"
     out.mkdir()
     for name, sources in {
@@ -66,6 +67,29 @@ def test_publish_refuses_uncommitted_code(built, monkeypatch):
     with pytest.raises(RuntimeError, match="Commit your code first"):
         publish.publish(api, "me/bench", *built)
     assert api.calls == []  # nothing touched the Hub
+
+
+def test_publish_refuses_failed_contract(built, monkeypatch):
+    monkeypatch.setattr(publish, "code_revision", lambda: "abc1234")
+    monkeypatch.setattr(
+        checks, "run", lambda *a: {"ids_unique": ["synth/x/f"], "schema": [], "synth_shares": []}
+    )
+    api = FakeApi()
+    with pytest.raises(RuntimeError, match=r"Data contract failed.*\['ids_unique'\]"):
+        publish.publish(api, "me/bench", *built)
+    assert api.calls == []
+
+
+def test_verify_compares_hub_lfs_hashes():
+    record = {"repo_id": "me/bench", "revision": "r1", "sha256": {"train": "aa", "val": "bb"}}
+
+    class Api:
+        def get_paths_info(self, repo_id, paths, revision, repo_type):
+            assert (repo_id, revision, repo_type) == ("me/bench", "r1", "dataset")
+            lfs = {"data/train.parquet": "aa", "data/val.parquet": "XX"}
+            return [SimpleNamespace(path=p, lfs=SimpleNamespace(sha256=lfs[p])) for p in paths]
+
+    assert publish.verify(Api(), record) == ["data/val.parquet: hub XX, local bb"]
 
 
 def test_split_counts(built):

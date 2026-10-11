@@ -59,3 +59,11 @@ def test_card_body_has_pipeline_numbers():
     assert "| **total** | 3 | 10 | 13 |" in text
     assert "| empty text | 7 |" in text
     assert f"| `data/train.parquet` | `{'a' * 64}` |" in text
+
+
+def test_card_split_method_matches_assign_split():
+    text = card_text()
+    assert "first 8 bytes of `sha256(" in text and "big-endian" in text
+    # TRAIN_PCT, VAL_PCT = 80, 10
+    for bucket_range, hf_name in [("0-79", "train"), ("80-89", "validation"), ("90-99", "test")]:
+        assert f"{bucket_range} {hf_name}" in text
