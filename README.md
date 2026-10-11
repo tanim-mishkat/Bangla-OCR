@@ -4,7 +4,7 @@ A reproducible benchmark for Bangla (Bengali) OCR: a data pipeline that builds a
 text-image dataset, and an eval harness that scores OCR systems with CER/WER, bootstrap
 confidence intervals, and per-category error breakdowns.
 
-> Status: Phase 2 (ingest) done; Phase 3 (clean & validate) next. See [PROGRESS.md](PROGRESS.md).
+> Status: Phase 3 (clean & validate) done; Phase 4 (pipeline & publish) next. See [PROGRESS.md](PROGRESS.md).
 
 ## Roadmap
 
@@ -40,6 +40,10 @@ uv run python -m bangla_ocr.reid          # REID2019 pages -> region crops (1264
 uv run python -m bangla_ocr.corpus        # Wikipedia -> 3000 text lines
 uv run python -m bangla_ocr.synth         # lines x 5 fonts -> degraded images (~15k, ~220 MB)
 uv run python -m bangla_ocr.ingest        # combine + validate -> data/interim/ingested.parquet
+uv run python -m bangla_ocr.clean         # normalise labels, drop empties/duplicates (+ drop report)
+uv run python -m bangla_ocr.split         # data/processed/{train,val,test}.parquet (REID = test only)
+uv run pytest tests/test_data.py          # data contract on the real output
+uv run python scripts/data_summary.py     # summary tables
 ```
 
 ## Layout

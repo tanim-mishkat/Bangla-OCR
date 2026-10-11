@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 3 - Clean & validate: **in progress**. Next: step 4 (data tests on real output).
+Phase 3 - Clean & validate: **in progress**. Next: Phase 3 quiz.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -36,6 +36,8 @@ Phase 3 - Clean & validate: **in progress**. Next: step 4 (data tests on real ou
 - [x] Step 2: `clean.py` -> `data/interim/clean.parquet` (15661 = 677 reid + 14984 synth) + `clean_report.json`
 - [x] Step 3: `assign_split` (written by me, sha256 bucket) -> `data/processed/{train,val,test}.parquet`:
   train 11920 / val 1495 / test 2246 (677 reid + 1569 synth); synth 79.6/10.0/10.5%
+- [x] Step 4: `tests/test_data.py` (9 checks on real output, skipped if not built; each proven to fail
+  on corrupted data) + `scripts/data_summary.py`
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -52,6 +54,9 @@ Phase 3 - Clean & validate: **in progress**. Next: step 4 (data tests on real ou
 - Clean: only drops = 587 empty REID. 76 REID rows share text with another (mostly page numbers)
   but are distinct images -> kept (REID is test-only, cannot leak); dedupe REID by image bytes.
   115/677 REID regions are page numbers -> Phase 5 CER by `region_type`.
+- Test synth = 1569 images but only 314 unique texts (x5 fonts) -> Phase 5 bootstrap must resample
+  by text_id (cluster), not by image, or CIs come out too narrow.
+- REID test: median 16 chars, max 1374, 52% contain digits (vs ~16% synth) -> report REID separately.
 - Levels ~1/3 each (clean/mild/heavy); heavy still human-readable (eyeballed).
 - Noisy PNGs barely compress (noise is random): 221 MB, kept lossless (JPEG adds a hidden 2nd variable).
 
