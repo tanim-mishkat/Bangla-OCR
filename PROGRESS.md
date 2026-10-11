@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 - Dagster + Hugging Face: **in progress**. Next: quiz.
+Phase 4 - Dagster + Hugging Face: **done**. Next: Phase 5 (eval harness), waiting for "go".
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -54,6 +54,9 @@ Phase 4 - Dagster + Hugging Face: **in progress**. Next: quiz.
   `hf_dataset` alone can no longer skip checks). Hub LFS sha256 == local (`publish.verify`).
 - [x] Step 4: pinned `publish.PINNED` = revision `94f4021` (code `5956651`); data test fails if
   local splits drift from it. Phase 5 evaluates only this revision.
+- [x] Quiz: 3/3 correct (blocking checks are per-run -> gate at point of action; atomic commit =
+  no mixed revision; pin commit not `main`, hashes verify bytes). Interview strong; add: version
+  tag + changelog of changed ids, re-score old models on both versions, deprecation window.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
