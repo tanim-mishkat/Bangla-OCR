@@ -8,7 +8,7 @@ import json
 import dagster as dg
 import polars as pl
 
-from bangla_ocr import clean, corpus, download, ingest, reid, split, synth
+from bangla_ocr import checks, clean, corpus, download, ingest, reid, split, synth
 from bangla_ocr.sources import FONTS, REID2019, WIKI_BN
 
 GROUP = "dataset"
@@ -76,6 +76,21 @@ def splits() -> dg.MaterializeResult:
     return dg.MaterializeResult(metadata={**meta, "by_source": dg.MetadataValue.json(counts)})
 
 
+@dg.multi_asset_check(
+    specs=[dg.AssetCheckSpec(name, asset=splits, blocking=True) for name in checks.NAMES]
+)
+def splits_contract():
+    """bangla_ocr.checks on the real files; a failure blocks everything downstream (publish)."""
+    for name, problems in checks.run().items():
+        yield dg.AssetCheckResult(
+            asset_key=splits.key,
+            check_name=name,
+            passed=not problems,
+            metadata={"problems": len(problems), "examples": dg.MetadataValue.json(problems[:5])},
+        )
+
+
 defs = dg.Definitions(
-    assets=[raw_sources, reid_crops, text_corpus, synth_images, ingested, cleaned, splits]
+    assets=[raw_sources, reid_crops, text_corpus, synth_images, ingested, cleaned, splits],
+    asset_checks=[splits_contract],
 )

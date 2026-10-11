@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 2 (asset checks).
+Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 3 (dataset card + publish).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -45,6 +45,8 @@ Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 2 (asset checks).
 ### Phase 4
 - [x] Step 1: Dagster assets wrap each build step (`defs.py`), metadata per run; graph test;
   full CLI materialise = identical outputs (~1m45s with caches)
+- [x] Step 2: `checks.py` = one data contract (9 checks -> list of problems) used by pytest AND
+  blocking Dagster asset checks; `share_problems` written by me; blocking proven by test + mutation
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -83,6 +85,7 @@ Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 2 (asset checks).
 - Invisible chars in source code: write as `\u200d` escapes, never literals (unreviewable).
 
 - `map_elements` skips nulls: a guard inside the function never fires for them -> check nulls outside.
+- Float tolerance edges: abs(0.08-0.10) > 0.02 is True; test just inside/outside, not on the edge.
 - Hash split, not shuffle: stable when data is added; never Python `hash()` (per-process salt).
 
 ## Habits
