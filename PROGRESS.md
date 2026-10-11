@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 3 - Clean & validate: **in progress**. Next: step 3 (`assign_split`).
+Phase 3 - Clean & validate: **in progress**. Next: step 4 (data tests on real output).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -34,6 +34,8 @@ Phase 3 - Clean & validate: **in progress**. Next: step 3 (`assign_split`).
 ### Phase 3
 - [x] Step 1: `normalise_text` (written by me): drop ZWSP/ZWNJ/ZWJ/BOM -> collapse whitespace -> NFC
 - [x] Step 2: `clean.py` -> `data/interim/clean.parquet` (15661 = 677 reid + 14984 synth) + `clean_report.json`
+- [x] Step 3: `assign_split` (written by me, sha256 bucket) -> `data/processed/{train,val,test}.parquet`:
+  train 11920 / val 1495 / test 2246 (677 reid + 1569 synth); synth 79.6/10.0/10.5%
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -67,6 +69,9 @@ Phase 3 - Clean & validate: **in progress**. Next: step 3 (`assign_split`).
 
 - Dedupe key follows the reason: text for leakage (synth), image bytes for true duplicates (REID).
 - Invisible chars in source code: write as `‍` escapes, never literals (unreviewable).
+
+- `map_elements` skips nulls: a guard inside the function never fires for them -> check nulls outside.
+- Hash split, not shuffle: stable when data is added; never Python `hash()` (per-process salt).
 
 ## Habits
 - Before commit: `uv run ruff format . ; uv run ruff check . ; uv run pytest`
