@@ -7,8 +7,9 @@ import json
 
 import dagster as dg
 import polars as pl
+from huggingface_hub import HfApi
 
-from bangla_ocr import checks, clean, corpus, download, ingest, reid, split, synth
+from bangla_ocr import checks, clean, corpus, download, ingest, publish, reid, split, synth
 from bangla_ocr.sources import FONTS, REID2019, WIKI_BN
 
 GROUP = "dataset"
@@ -76,6 +77,31 @@ def splits() -> dg.MaterializeResult:
     return dg.MaterializeResult(metadata={**meta, "by_source": dg.MetadataValue.json(counts)})
 
 
+class HuggingFace(dg.ConfigurableResource):
+    token: str
+    repo_name: str = publish.REPO_NAME
+
+    def api(self) -> HfApi:
+        return HfApi(token=self.token)
+
+
+@dg.asset(group_name="publish", deps=[splits])
+def hf_dataset(hf: HuggingFace) -> dg.MaterializeResult:
+    """Private HF dataset repo; runs only if every blocking check on `splits` passed."""
+    api = hf.api()
+    repo_id = f"{api.whoami()['name']}/{hf.repo_name}"
+    record = publish.publish(api, repo_id)
+    publish.RECORD_PATH.write_text(json.dumps(record, indent=2), encoding="utf-8")
+    url = f"https://huggingface.co/datasets/{repo_id}/tree/{record['revision']}"
+    return dg.MaterializeResult(
+        metadata={
+            "url": dg.MetadataValue.url(url),
+            "revision": record["revision"],
+            "code_revision": record["code_revision"],
+        }
+    )
+
+
 @dg.multi_asset_check(
     specs=[dg.AssetCheckSpec(name, asset=splits, blocking=True) for name in checks.NAMES]
 )
@@ -91,6 +117,16 @@ def splits_contract():
 
 
 defs = dg.Definitions(
-    assets=[raw_sources, reid_crops, text_corpus, synth_images, ingested, cleaned, splits],
+    assets=[
+        raw_sources,
+        reid_crops,
+        text_corpus,
+        synth_images,
+        ingested,
+        cleaned,
+        splits,
+        hf_dataset,
+    ],
     asset_checks=[splits_contract],
+    resources={"hf": HuggingFace(token=dg.EnvVar("HF_TOKEN"))},
 )

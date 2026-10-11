@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 3 (dataset card + publish).
+Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 3 live publish (materialise `hf_dataset`), then quiz.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -47,6 +47,8 @@ Phase 4 - Dagster + Hugging Face: **in progress**. Next: step 3 (dataset card + 
   full CLI materialise = identical outputs (~1m45s with caches)
 - [x] Step 2: `checks.py` = one data contract (9 checks -> list of problems) used by pytest AND
   blocking Dagster asset checks; `share_problems` written by me; blocking proven by test + mutation
+- [x] Step 3 (code): `card.py` (`split_table` written by me) + `publish.py` (one atomic HF commit,
+  refuses dirty code, private) + `hf_dataset` asset gated by the checks; fake-Hub tests
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.

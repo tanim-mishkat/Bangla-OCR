@@ -22,6 +22,7 @@ def test_asset_graph():
         "ingested": ["reid_crops", "synth_images"],
         "cleaned": ["ingested"],
         "splits": ["cleaned"],
+        "hf_dataset": ["splits"],
     }
 
 
