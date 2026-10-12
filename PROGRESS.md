@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 5 - eval harness: **in progress**. Next: step 6 `cluster_bootstrap` (me): CIs by `text_id`.
+Phase 5 - eval harness: **in progress**. Next: step 6 `cluster_bootstrap` (me): CIs by `text_id` (synth) / `page` (REID, text_id is null).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
