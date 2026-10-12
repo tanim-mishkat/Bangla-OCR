@@ -1,7 +1,8 @@
 # Progress
 
 ## Current phase
-Phase 5 - eval harness: **in progress**. Next: decide look-alike folding (৷/। , ৰ/র), then EasyOCR.
+Phase 5 - eval harness: **in progress**. Tesseract + EasyOCR done. Next: Gemini on a stratified,
+fixed-seed sample, then the Phase 5 quiz.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -96,6 +97,29 @@ Phase 5 - eval harness: **in progress**. Next: decide look-alike folding (৷/�
   যুক্তাক্ষর = biggest error class (synth 27% of errors, non-empty 38%; error rate 0.097 vs
   consonants 0.048). REID: Bangla digits 0.52, punctuation 0.49, insertions 21% of errors
   (hallucinated ০ . - ␣). Latin digit leakage: REID 125, synth 3 (synth labels have 10 real ones).
+- [x] Look-alike decision (Option 1): labels + normalisation unchanged, limitation documented;
+  revisit before Phase 7.
+- [x] Step 9A/B: EasyOCR 1.7.2 CPU engine (`easyocr_engine.py`), optional `easyocr` dependency group
+  (torch 2.14.1+cpu, opencv 5.0 locked). CRAFT + bengali_g1 weights sha256-pinned in `sources.py`
+  (md5 = EasyOCR's own config), `download_enabled=False`. Settings in the cache key: langs ["bn"],
+  greedy, quantize. Fair layout hint: synth `recognize` (one line, like psm 7), REID `readtext` +
+  `reading_order` (written by me: centre-y grouping vs line's first word, > half height = new line,
+  min-x sort; 10 tests, 6 mutants caught). Fairness test: precomposed য় (EasyOCR) == য + ় (labels).
+- [x] Step 9C: val smoke (100 rows, `7fc4431d6f9f`): 0.455 s/line, peak RAM 790 MB, cache reuse OK.
+  Full test run `14e8c29fc5dd`: 2246/2246, 0 errors, no dup ids, same data_sha256 as Tesseract,
+  rerun = 2246 cached. 25.9 min compute: synth 0.38 s/line, REID 1.41 s/block (p95 5.7, max 32 s).
+- [x] Step 9D: EasyOCR vs Tesseract (paired, cluster CIs; diff = EasyOCR - Tesseract):
+  synth CER 0.030 vs 0.066, diff -0.036 [-0.047, -0.025]; heavy 0.037 vs 0.155 (-0.118);
+  mild tie; **clean worse** 0.030 vs 0.019 (+0.011 [0.006, 0.016]). REID 0.170 vs 0.236,
+  diff -0.066 [-0.126, -0.022]; paragraphs -0.066 clear; page numbers 0.94 vs 0.98 (no clear diff).
+  GER: synth 0.049, REID 0.263. WER worse on synth: 0.184 vs 0.150 (REID 0.612 vs 0.594).
+  Breakdown: EasyOCR's errors are punctuation, not script. Synth: punctuation 38% of errors
+  (। read as | / ! ] [ or dropped; , as ; or )), inserted spaces 23% (220 lines end "word |":
+  a space before the mark). Letters-only diagnostic (scratch, punct+space+symbols removed both
+  sides): synth 0.016 vs 0.066, clean 0.014 vs 0.019 -> clean deficit = punctuation only.
+  যুক্তাক্ষর error rate 0.023 (Tesseract 0.097). REID: 124 empty (98 page numbers, only 463
+  chars), Latin digits 207 (। -> 1 56x), Bangla digits 0.65 error rate. Model sometimes emits
+  precomposed য় + extra ় (double nukta, 11x synth): real model output, scored as is.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -110,6 +134,11 @@ Phase 5 - eval harness: **in progress**. Next: decide look-alike folding (৷/�
 - Labels contain look-alikes: ৷ U+09F7 (currency numerator) used as danda (synth 10, REID 57) and
   Assamese ৰ U+09F0 for র (REID 130). Tesseract confuses । <-> ৷ (62x). Folding both changes CER
   by 0.0004 synth / 0.0036 REID (inside CIs) -> open decision, not silently normalised.
+- EasyOCR 1.7.2 bug: `self.quantize=quantize,` (trailing comma = tuple) -> `quantize=False` is
+  ignored for the detector. We use the default True, so unaffected; noted for reproducers.
+- EasyOCR bengali_g1 charset = shared digits/symbols (0-9, | ! [ ] ; ...) + Latin a-z + Bangla
+  incl. । (no ॥, ৷, ৰ). `langs=["bn"]` blocks Latin letters (0 in output) but not Latin digits or
+  symbols, so the danda competes with look-alike | ! ] 1 and loses ~half the time.
 - Same line rendered in 5 fonts -> Phase 3 split must group by `text_id` (leakage).
 - 16 line-font pairs skipped: font lacks glyph (U+FDFA, ≠, −, ★, ć) -> would render tofu with a correct label.
 - Clean: only drops = 587 empty REID. 76 REID rows share text with another (mostly page numbers)
@@ -147,5 +176,6 @@ Phase 5 - eval harness: **in progress**. Next: decide look-alike folding (৷/�
 - After each commit: `git push`.
 
 ## Next
-- Phase 4 quiz, then Phase 5: eval harness on `PINNED` (Tesseract, EasyOCR, vision LLMs; CER/WER,
-  bootstrap CIs by `text_id`, error breakdowns, REID reported separately).
+- Phase 5: Gemini on a stratified, fixed-seed test sample (same scoring + paired CIs on that
+  sample), then the Phase 5 quiz.
+- Before Phase 7: revisit look-alikes (৷/।, ৰ/র); consider a letters-only CER column in `score`.
