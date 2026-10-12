@@ -107,9 +107,9 @@ def run(
 
 
 def engines() -> dict[str, Callable[[], Engine]]:
-    from bangla_ocr import tesseract  # imported lazily: each engine has its own heavy deps
+    from bangla_ocr import easyocr_engine, tesseract  # lazily: each engine has heavy deps
 
-    return {"tesseract": tesseract.engine}
+    return {"tesseract": tesseract.engine, "easyocr": easyocr_engine.engine}
 
 
 if __name__ == "__main__":

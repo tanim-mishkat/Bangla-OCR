@@ -56,6 +56,13 @@ def test_prediction_normalised_like_labels():
     assert df["hyp"][0] == "আমি ভাত"
 
 
+def test_precomposed_nukta_letters_are_not_errors():
+    # EasyOCR emits U+09DF (precomposed); NFC labels store U+09AF + U+09BC (composition exclusion)
+    label = "আমি " + chr(0x09AF) + chr(0x09BC)
+    df = score.score_rows(labels(label), preds("আমি " + chr(0x09DF)))
+    assert df["char_edits"][0] == 0
+
+
 def test_insertions_can_exceed_label_length():
     df = score.score_rows(labels("কখ"), preds("কখগঘঙ"))
     assert df["char_edits"][0] == 3 > df["chars"][0]  # row CER 1.5: not clipped

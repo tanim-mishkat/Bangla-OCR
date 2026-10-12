@@ -90,3 +90,23 @@ TESS_BEN = Source(
     licence="Apache-2.0",
     citation="Tesseract tessdata_best Bengali LSTM model (github.com/tesseract-ocr/tessdata_best)",
 )
+
+# EasyOCR weights: fetched + sha256-pinned by us, never by EasyOCR's own downloader.
+# The releases are tags, but assets can be replaced: the hash is what pins them.
+_EASYOCR_URL = "https://github.com/JaidedAI/EasyOCR/releases/download/"
+EASYOCR_CRAFT = Source(
+    name="easyocr_craft",
+    url=_EASYOCR_URL + "pre-v1.1.6/craft_mlt_25k.zip",
+    filename="easyocr/craft_mlt_25k.zip",
+    sha256="8dc6a1c703a89ed56308ef742d26ebd45c656248cbbbda6e7fe60e569f873e65",
+    licence="MIT (CRAFT-pytorch, Clova AI)",
+    citation="CRAFT detector (Baek et al., CVPR 2019) via EasyOCR (github.com/JaidedAI/EasyOCR)",
+)
+EASYOCR_BEN = Source(
+    name="easyocr_ben",
+    url=_EASYOCR_URL + "v1.1.8/bengali.zip",
+    filename="easyocr/bengali.zip",
+    sha256="b9f88f7beef9aa5480c62e9f84c50be82214e5b209d0115465c30175eca4f944",
+    licence="Apache-2.0",
+    citation="EasyOCR bengali_g1 recognition model (github.com/JaidedAI/EasyOCR)",
+)

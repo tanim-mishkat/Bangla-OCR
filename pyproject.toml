@@ -35,3 +35,10 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.16.10",
 ]
+easyocr = [
+    "easyocr==1.7.2",
+]
+
+[tool.uv]
+# easyocr pulls torch (~1 GB on disk); skip it with `uv sync --no-group easyocr`
+default-groups = ["dev", "easyocr"]
