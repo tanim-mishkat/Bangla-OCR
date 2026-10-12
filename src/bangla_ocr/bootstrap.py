@@ -58,19 +58,27 @@ def paired_bootstrap(
     cluster: str,
     num: str = "char_edits",
     den: str = "chars",
+    ref: str = "text",
     **kwargs,
 ) -> tuple[float, float, float]:
     """(diff, low, high) for ratio(a) - ratio(b), both engines resampled on the same clusters.
 
     Same labels -> same den per row, so the diff is sum(num_a - num_b) / sum(den): shared
     difficulty (a hard page is hard for both) cancels before resampling.
+    ref: label column; must be identical per id (equal lengths alone are not enough).
     """
     if a.height != b.height or a.join(b, on="id", how="anti").height:
         raise ValueError("engines were scored on different rows")
-    both = a.select("id", cluster, num, den).join(
-        b.select("id", pl.col(num).alias("_num_b"), pl.col(den).alias("_den_b")), on="id"
+    both = a.select("id", cluster, ref, num, den).join(
+        b.select(
+            "id",
+            pl.col(ref).alias("_ref_b"),
+            pl.col(num).alias("_num_b"),
+            pl.col(den).alias("_den_b"),
+        ),
+        on="id",
     )
-    if (both[den] != both["_den_b"]).any():
+    if (both[ref] != both["_ref_b"]).any() or (both[den] != both["_den_b"]).any():
         raise ValueError("engines were scored against different labels")
     both = both.with_columns(pl.col(num) - pl.col("_num_b"))
     low, high = cluster_bootstrap(both, cluster, num, den, **kwargs)

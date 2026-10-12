@@ -23,6 +23,7 @@ def fonts_like(n_texts=60, n_fonts=5, seed=1) -> pl.DataFrame:
             "chars": chars.tolist() * n_fonts,
             "c": [f"t{i}" for i in range(n_texts)] * n_fonts,
             "id": [f"r{i}" for i in range(n_texts * n_fonts)],
+            "text": ["ক" * c for c in chars.tolist()] * n_fonts,
         }
     )
 
@@ -122,3 +123,7 @@ def test_paired_refuses_different_labels():
     a = fonts_like()
     with pytest.raises(ValueError, match="different labels"):
         paired_bootstrap(a, a.with_columns(pl.col("chars") + 1), "c")
+    # same lengths, different text: a length check alone would accept this
+    same_length = a.with_columns(pl.col("text").str.replace_all("ক", "খ"))
+    with pytest.raises(ValueError, match="different labels"):
+        paired_bootstrap(a, same_length, "c")

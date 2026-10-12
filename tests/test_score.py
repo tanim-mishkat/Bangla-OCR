@@ -51,7 +51,7 @@ def test_empty_or_error_costs_every_label_char(hyp):
 
 def test_prediction_normalised_like_labels():
     # ZWJ + extra whitespace in the output are not OCR errors
-    df = score.score_rows(labels("আমি ভাত"), preds("  আমি‍   ভাত\n"))
+    df = score.score_rows(labels("আমি ভাত"), preds("  আমি\u200d   ভাত\n"))
     assert df["char_edits"][0] == 0
 
 
