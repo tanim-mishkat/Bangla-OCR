@@ -62,6 +62,9 @@ Phase 4 - Dagster + Hugging Face: Phase 5 - eval harness: **in progress**. Next:
 - [x] Step 1: Tesseract 5.4.0 + pinned `tessdata_best/ben.traineddata` (11 MB, sha256) in
   `data/raw/tessdata`; `tesseract.py` CLI wrapper (stdin PNG, `--oem 1`, `--psm 7` line / 6 block).
   First 3 test images: decorative font -> conjunct errors; 4 deg rotation + noise -> EMPTY output.
+- [x] My review: "Failed loading language 'eng'" warning. Cause: ben.traineddata config has
+  `tessedit_load_sublangs eng`; with eng present a Bangla word became "wets". Labels have 0 Latin
+  -> `tesseract_ben_only.cfg` disables it (`-c` can't: init-time param). Regression test + mutation.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.

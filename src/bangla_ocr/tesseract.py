@@ -12,6 +12,8 @@ from bangla_ocr.sources import TESS_BEN
 WINDOWS_EXE = Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe")
 PSM_LINE, PSM_BLOCK = 7, 6  # synthetic = one text line; REID regions = multi-line blocks
 OEM_LSTM = 1  # neural engine only (tessdata_best has no legacy model)
+# Without it, output depends on whether eng.traineddata happens to sit next to ben
+BEN_ONLY_CONFIG = Path(__file__).with_name("tesseract_ben_only.cfg")
 
 
 def exe() -> str:
@@ -48,6 +50,7 @@ def command(psm: int) -> list[str]:
         str(OEM_LSTM),
         "--psm",
         str(psm),
+        str(BEN_ONLY_CONFIG),
     ]
 
 
