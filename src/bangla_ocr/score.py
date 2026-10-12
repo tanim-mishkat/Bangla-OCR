@@ -37,6 +37,7 @@ def score_rows(labels: pl.DataFrame, preds: pl.DataFrame) -> pl.DataFrame:
         ref, hyp = r["text"], normalise_text(r["pred"] or "")
         rows.append(
             {
+                "hyp": hyp,  # normalised prediction: what every metric is computed on
                 "char_edits": edit_distance(ref, hyp),
                 "chars": len(ref),
                 "word_edits": edit_distance(ref.split(), hyp.split()),

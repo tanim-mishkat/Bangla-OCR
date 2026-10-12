@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 5 - eval harness: **in progress**. Next: step 8 error breakdown (conjuncts / graphemes / digits), then EasyOCR.
+Phase 5 - eval harness: **in progress**. Next: decide look-alike folding (৷/। , ৰ/র), then EasyOCR.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -86,6 +86,16 @@ Phase 5 - eval harness: **in progress**. Next: step 8 error breakdown (conjuncts
   `--vs RUN` prints paired diffs with `clear` = CI excludes 0. Tesseract CER: synth 0.066
   [0.055, 0.077], REID 0.236 [0.183, 0.308]. Slices with few clusters (REID other: 2,
   drop-capital: 1) have meaningless CIs: read the `clusters` column.
+- [x] Step 8: `breakdown.py`. `bangla_graphemes` (written by me: MARK/হসন্ত join, consonant after
+  হসন্ত joins = যুক্তাক্ষর; own rules because Python 3.12 Unicode 15.0 lacks the 15.1 conjunct break).
+  `align` = full DP + backtrace (ties: sub > del > ins), `array("I")` rows (1374-char REID line ~7.5 MB).
+  Every char edit attributed once (sub/del -> ref char class, ins -> "inserted"): class errors sum
+  to char_edits on all 2246 rows. GER = grapheme edits / ref graphemes (~1.6 code points each).
+  Two views: OVERALL (empties = all deleted) and DIAGNOSTIC (non-empty only). Tesseract:
+  synth CER 0.066 / GER 0.074, non-empty CER 0.029; REID CER 0.236 / GER 0.308, non-empty 0.208.
+  যুক্তাক্ষর = biggest error class (synth 27% of errors, non-empty 38%; error rate 0.097 vs
+  consonants 0.048). REID: Bangla digits 0.52, punctuation 0.49, insertions 21% of errors
+  (hallucinated ০ . - ␣). Latin digit leakage: REID 125, synth 3 (synth labels have 10 real ones).
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -97,6 +107,9 @@ Phase 5 - eval harness: **in progress**. Next: step 8 error breakdown (conjuncts
 - Corpus: 3000 lines, median 35 chars, 505 with Bangla digits. Hidden chars: ZWNJ 3, ZWJ 5, NBSP 9
   -> Phase 3 normalisation must decide on these (they change CER while looking identical).
 - Wikipedia is CC BY-SA -> synthetic subset (and published dataset) must be CC BY-SA.
+- Labels contain look-alikes: ৷ U+09F7 (currency numerator) used as danda (synth 10, REID 57) and
+  Assamese ৰ U+09F0 for র (REID 130). Tesseract confuses । <-> ৷ (62x). Folding both changes CER
+  by 0.0004 synth / 0.0036 REID (inside CIs) -> open decision, not silently normalised.
 - Same line rendered in 5 fonts -> Phase 3 split must group by `text_id` (leakage).
 - 16 line-font pairs skipped: font lacks glyph (U+FDFA, ≠, −, ★, ć) -> would render tofu with a correct label.
 - Clean: only drops = 587 empty REID. 76 REID rows share text with another (mostly page numbers)

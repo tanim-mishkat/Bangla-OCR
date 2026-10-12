@@ -53,6 +53,7 @@ def test_prediction_normalised_like_labels():
     # ZWJ + extra whitespace in the output are not OCR errors
     df = score.score_rows(labels("আমি ভাত"), preds("  আমি\u200d   ভাত\n"))
     assert df["char_edits"][0] == 0
+    assert df["hyp"][0] == "আমি ভাত"
 
 
 def test_insertions_can_exceed_label_length():
