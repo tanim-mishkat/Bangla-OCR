@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 - Dagster + Hugging Face: Phase 5 - eval harness: **in progress**. Next: step 3 full Tesseract run, then `edit_distance` (me).
+Phase 5 - eval harness: **in progress**. Next: step 4 `edit_distance` (me), then CER/WER scoring.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -68,6 +68,8 @@ Phase 4 - Dagster + Hugging Face: Phase 5 - eval harness: **in progress**. Next:
 - [x] Step 2: `predict.py` resumable cache, one row per id (pred, seconds, error) in atomic parquet
   parts; key = hash(engine config + split sha256) -> new settings/data never reuse rows; errors
   stored + retried, `""` kept (CER 1). CLI `python -m bangla_ocr.predict tesseract [--limit N]`.
+- [x] Step 3: full Tesseract test run (cache `fd3806085e5a`): 2246 preds, 0 errors, 307 s total;
+  rerun = 2246 cached. 129 empty (5.7%): REID 70/677, synth heavy 59/532, clean + mild 0.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
