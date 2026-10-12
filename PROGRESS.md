@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 - Dagster + Hugging Face: **done**. Next: Phase 5 (eval harness), waiting for "go".
+Phase 4 - Dagster + Hugging Face: Phase 5 - eval harness: **in progress**. Next: step 2 prediction cache.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -57,6 +57,11 @@ Phase 4 - Dagster + Hugging Face: **done**. Next: Phase 5 (eval harness), waitin
 - [x] Quiz: 3/3 correct (blocking checks are per-run -> gate at point of action; atomic commit =
   no mixed revision; pin commit not `main`, hashes verify bytes). Interview strong; add: version
   tag + changelog of changed ids, re-score old models on both versions, deprecation window.
+
+### Phase 5
+- [x] Step 1: Tesseract 5.4.0 + pinned `tessdata_best/ben.traineddata` (11 MB, sha256) in
+  `data/raw/tessdata`; `tesseract.py` CLI wrapper (stdin PNG, `--oem 1`, `--psm 7` line / 6 block).
+  First 3 test images: decorative font -> conjunct errors; 4 deg rotation + noise -> EMPTY output.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
