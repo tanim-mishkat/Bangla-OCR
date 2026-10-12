@@ -1,8 +1,8 @@
 # Progress
 
 ## Current phase
-Phase 5 - eval harness: **in progress**. Tesseract + EasyOCR done. Next: Gemini on a stratified,
-fixed-seed sample, then the Phase 5 quiz.
+Phase 5 - eval harness: **in progress**. Tesseract + EasyOCR done; Gemini 10A (sampling) done.
+Next: AI Studio limits -> final QUOTAS -> 10B Gemini engine, then the Phase 5 quiz.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -120,6 +120,17 @@ fixed-seed sample, then the Phase 5 quiz.
   যুক্তাক্ষর error rate 0.023 (Tesseract 0.097). REID: 124 empty (98 page numbers, only 463
   chars), Latin digits 207 (। -> 1 56x), Bangla digits 0.65 error rate. Model sometimes emits
   precomposed য় + extra ় (double nukta, 11x synth): real model output, scored as is.
+- [x] Step 10 plan (Gemini): `gemini-3.8-flash`, free tier (Google may use inputs: data is public,
+  CC BY-SA / PD; note possible future contamination). Pinned model id + response model_version,
+  fixed prompt (hash in config), default settings, raw responses + tokens + finish reason cached.
+  RECITATION/SAFETY = real output (scored empty); only 429/5xx/network retried. Compare all 3
+  engines on the same sampled ids only; report cost + latency too.
+- [x] Step 10A: `sample.py`, `sample_ids` written by me: per source, rank distinct cluster keys
+  (synth text_id, REID page) by sha256(f"{seed}:{key}"), keep k smallest, all rows of them.
+  Order-independent, Python-version-stable, nested (bigger quota keeps smaller sample).
+  SEED 20261012. Row counts: synth 40/60/80 texts -> 200/300/400; REID 15/20/25/30 pages ->
+  226/282/312/354. Default QUOTAS 60 + 20 = 582 test calls (+~50 val). Final QUOTAS: set from
+  AI Studio limits BEFORE any test call.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
@@ -168,6 +179,7 @@ fixed-seed sample, then the Phase 5 quiz.
 - `map_elements` skips nulls: a guard inside the function never fires for them -> check nulls outside.
 - Float tolerance edges: abs(0.08-0.10) > 0.02 is True; test just inside/outside, not on the edge.
 - Hash split, not shuffle: stable when data is added; never Python `hash()` (per-process salt).
+- Sample whole clusters (the bootstrap's unit), or CIs on the sample are too narrow.
 
 ## Habits
 - Before commit: `uv run ruff format . ; uv run ruff check . ; uv run pytest`
@@ -176,6 +188,8 @@ fixed-seed sample, then the Phase 5 quiz.
 - After each commit: `git push`.
 
 ## Next
-- Phase 5: Gemini on a stratified, fixed-seed test sample (same scoring + paired CIs on that
-  sample), then the Phase 5 quiz.
+- Phase 5: send AI Studio RPM/RPD for gemini-3.8-flash -> fix QUOTAS -> write data/samples/test.json.
+  10B: gemini engine + `ids` subset in predict.run (old cache keys must not change) + mocked
+  tests. 10C: val smoke (~20 rows) + nondeterminism check (~30 val rows twice). 10D: sample run.
+  10E: 3-way paired comparison on the sample + hallucination check. Then the Phase 5 quiz.
 - Before Phase 7: revisit look-alikes (৷/।, ৰ/র); consider a letters-only CER column in `score`.
