@@ -29,6 +29,11 @@ uv run ruff format . # format
 
 Copy `.env.example` to `.env` and fill in API keys (never commit `.env`).
 
+**Tesseract (Phase 5):** install the engine (`winget install UB-Mannheim.TesseractOCR`, tested
+with 5.4.0). The Bengali model is not taken from the install: `tessdata_best/ben.traineddata` is
+downloaded at a pinned commit + sha256 into `data/raw/tessdata/` on first use. If `tesseract` is
+not on PATH or in the default install folder, set `TESSERACT_CMD`.
+
 ## Build the data
 
 The whole pipeline is a Dagster asset graph (`src/bangla_ocr/defs.py`). From the repo root:

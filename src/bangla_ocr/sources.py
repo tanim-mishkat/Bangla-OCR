@@ -80,3 +80,13 @@ FONTS = (
         "acc22b41ee470dc542e15b5f8907c7fbebef1b9c01eb20e4127bdbf052b006ee",
     ),
 )
+
+_TESSDATA_REV = "e12c65a915945e4c28e237a9b52bc4a8f39a0cec"
+TESS_BEN = Source(
+    name="tess_ben",
+    url=f"https://raw.githubusercontent.com/tesseract-ocr/tessdata_best/{_TESSDATA_REV}/ben.traineddata",
+    filename="tessdata/ben.traineddata",
+    sha256="1cd0129288d1f74f6661c35e638e487bd146a66bb732ecd9e011e48dcb0df623",
+    licence="Apache-2.0",
+    citation="Tesseract tessdata_best Bengali LSTM model (github.com/tesseract-ocr/tessdata_best)",
+)
