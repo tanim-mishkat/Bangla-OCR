@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 5 - eval harness: **in progress**. Next: step 4 `edit_distance` (me), then CER/WER scoring.
+Phase 5 - eval harness: **in progress**. Next: step 6 `cluster_bootstrap` (me): CIs by `text_id`.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -70,6 +70,13 @@ Phase 5 - eval harness: **in progress**. Next: step 4 `edit_distance` (me), then
   stored + retried, `""` kept (CER 1). CLI `python -m bangla_ocr.predict tesseract [--limit N]`.
 - [x] Step 3: full Tesseract test run (cache `fd3806085e5a`): 2246 preds, 0 errors, 307 s total;
   rerun = 2246 cached. 129 empty (5.7%): REID 70/677, synth heavy 59/532, clean + mild 0.
+- [x] Step 4: `edit_distance` (written by me): two-row Levenshtein; 11 tests incl. random cross-check
+  vs recursive reference + tracemalloc test that a full matrix fails.
+- [x] Step 5: `score.py`: normalise pred like labels, null/error -> "" (CER 1), refuses incomplete runs
+  and predictions made on other data (config `data_sha256`), micro-averaged CER/WER per slice,
+  REID never blended with synth. Tesseract: synth CER 0.066 (clean 0.019 / mild 0.022 / heavy 0.155),
+  Galada worst 0.098; REID CER 0.236, WER 0.594; page numbers CER 0.98 (57x41 px crops, ~2 chars,
+  `--psm 6`, Latin digits leak in) -> REID is test-only, so no tuning possible on it.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
