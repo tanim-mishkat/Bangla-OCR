@@ -2,7 +2,7 @@ import numpy as np
 import polars as pl
 import pytest
 
-from bangla_ocr.bootstrap import cluster_bootstrap
+from bangla_ocr.bootstrap import cluster_bootstrap, paired_bootstrap
 
 
 def rows(edits: list[int], chars: list[int], clusters: list) -> pl.DataFrame:
@@ -71,3 +71,54 @@ def test_null_cluster_key_refuses():
 def test_empty_refuses():
     with pytest.raises(ValueError, match="no rows"):
         cluster_bootstrap(rows([], [], []), "c")
+
+
+# --- paired: engine A vs engine B on the same rows ---
+
+
+def better_by_one(df: pl.DataFrame) -> pl.DataFrame:
+    """Engine B: one fewer error than A on every row that has any."""
+    return df.with_columns((pl.col("char_edits") - 1).clip(lower_bound=0))
+
+
+def cer(df: pl.DataFrame) -> float:
+    return df["char_edits"].sum() / df["chars"].sum()
+
+
+def test_paired_point_is_the_cer_difference():
+    a = fonts_like()
+    b = better_by_one(a)
+    diff, low, high = paired_bootstrap(a, b, "c")
+    assert diff == pytest.approx(cer(a) - cer(b))
+    assert low <= diff <= high
+
+
+def test_identical_engines_differ_by_exactly_zero():
+    a = fonts_like()
+    assert paired_bootstrap(a, a, "c") == (0.0, 0.0, 0.0)
+
+
+def test_pairing_detects_what_separate_intervals_cannot():
+    # texts vary a lot in difficulty -> wide separate CIs that overlap;
+    # pairing cancels text difficulty, so a small consistent gain is clearly > 0
+    a = fonts_like()
+    b = better_by_one(a)
+    a_low, _ = cluster_bootstrap(a, "c")
+    _, b_high = cluster_bootstrap(b, "c")
+    assert a_low < b_high  # separate intervals overlap: "no clear winner"
+    _, low, _ = paired_bootstrap(a, b, "c")
+    assert low > 0  # paired: A is worse, with 95% confidence
+
+
+def test_paired_refuses_different_rows():
+    a = fonts_like()
+    with pytest.raises(ValueError, match="different rows"):
+        paired_bootstrap(a, a.head(10), "c")
+    with pytest.raises(ValueError, match="different rows"):
+        paired_bootstrap(a, a.with_columns(pl.col("id") + "x"), "c")
+
+
+def test_paired_refuses_different_labels():
+    a = fonts_like()
+    with pytest.raises(ValueError, match="different labels"):
+        paired_bootstrap(a, a.with_columns(pl.col("chars") + 1), "c")

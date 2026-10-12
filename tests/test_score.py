@@ -13,13 +13,14 @@ def labels(*texts: str) -> pl.DataFrame:
         {
             "id": [f"r{i}" for i in range(n)],
             "text_id": [f"t{i}" for i in range(n)],
+            "page": [None] * n,
             "source": ["synth"] * n,
             "level": ["clean"] * n,
             "font": ["F"] * n,
             "region_type": [None] * n,
             "text": list(texts),
         },
-        schema_overrides={"region_type": pl.String},
+        schema_overrides={"region_type": pl.String, "page": pl.String},
     )
 
 
@@ -82,3 +83,37 @@ def test_score_refuses_predictions_on_other_data(tmp_path):
         score.score(run, split)
     (run / "config.json").write_text(json.dumps({"data_sha256": sha256_file(split)}))
     assert score.score(run, split)["char_edits"].to_list() == [0]
+
+
+def many() -> pl.DataFrame:
+    """20 texts x 2 fonts; engine output drops the last char of every 3rd row."""
+    texts = [("কখগঘঙ" * 3)[: 5 + i % 7] for i in range(20)] * 2
+    hyps = [t[:-1] if i % 3 == 0 else t for i, t in enumerate(texts)]
+    return score.score_rows(
+        labels(*texts).with_columns(text_id=pl.Series([f"t{i % 20}" for i in range(40)])),
+        preds(*hyps),
+    )
+
+
+def test_summary_ci_brackets_cer_and_counts_clusters():
+    s = score.summarise(many(), [], "text_id").row(0, named=True)
+    assert (s["n"], s["clusters"]) == (40, 20)
+    assert s["cer_low"] < s["cer"] < s["cer_high"]
+
+
+def test_summary_ci_per_group_with_null_key():
+    s = score.summarise(many(), ["region_type"], "text_id")  # region_type all null
+    assert s.height == 1 and s["clusters"][0] == 20 and s["cer_low"][0] < s["cer_high"][0]
+
+
+def test_compare_same_engine_is_no_difference():
+    rows = many()
+    c = score.compare(rows, rows, ["level"], "text_id").row(0, named=True)
+    assert (c["diff"], c["low"], c["high"], c["clear"]) == (0.0, 0.0, 0.0, False)
+
+
+def test_compare_sign_negative_when_a_is_better():
+    worse = many()
+    perfect = worse.with_columns(char_edits=pl.lit(0, dtype=pl.Int64))
+    c = score.compare(perfect, worse, [], "text_id").row(0, named=True)
+    assert c["diff"] == pytest.approx(-c["cer_b"]) and c["high"] < 0 and c["clear"]

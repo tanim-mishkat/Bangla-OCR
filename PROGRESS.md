@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 5 - eval harness: **in progress**. Next: step 6 `cluster_bootstrap` (me): CIs by `text_id` (synth) / `page` (REID, text_id is null).
+Phase 5 - eval harness: **in progress**. Next: step 8 error breakdown (conjuncts / graphemes / digits), then EasyOCR.
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -77,6 +77,15 @@ Phase 5 - eval harness: **in progress**. Next: step 6 `cluster_bootstrap` (me): 
   REID never blended with synth. Tesseract: synth CER 0.066 (clean 0.019 / mild 0.022 / heavy 0.155),
   Galada worst 0.098; REID CER 0.236, WER 0.594; page numbers CER 0.98 (57x41 px crops, ~2 chars,
   `--psm 6`, Latin digits leak in) -> REID is test-only, so no tuning possible on it.
+- [x] Step 6: `cluster_bootstrap` (written by me): percentile CI, whole clusters, seeded, sorted groups.
+  Real design effect (cluster CI width / row CI width): synth by text_id 1.11 (font + degradation
+  drive errors, not the text), REID by page 1.84 (scan quality per page). REID text_id is null ->
+  clustering by it would give one cluster and a zero-width CI; `cluster` has no default.
+- [x] Step 7: `paired_bootstrap` = `cluster_bootstrap` on per-row edit differences (same labels ->
+  same chars, so CER diff = sum(diff)/sum(chars)); `score` report has 95% CIs + cluster counts,
+  `--vs RUN` prints paired diffs with `clear` = CI excludes 0. Tesseract CER: synth 0.066
+  [0.055, 0.077], REID 0.236 [0.183, 0.308]. Slices with few clusters (REID other: 2,
+  drop-capital: 1) have meaningless CIs: read the `clusters` column.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.
