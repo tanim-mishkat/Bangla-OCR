@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phase 4 - Dagster + Hugging Face: Phase 5 - eval harness: **in progress**. Next: step 2 prediction cache.
+Phase 4 - Dagster + Hugging Face: Phase 5 - eval harness: **in progress**. Next: step 3 full Tesseract run, then `edit_distance` (me).
 
 ## Environment
 - Windows 11, PowerShell, 8GB RAM, no GPU
@@ -65,6 +65,9 @@ Phase 4 - Dagster + Hugging Face: Phase 5 - eval harness: **in progress**. Next:
 - [x] My review: "Failed loading language 'eng'" warning. Cause: ben.traineddata config has
   `tessedit_load_sublangs eng`; with eng present a Bangla word became "wets". Labels have 0 Latin
   -> `tesseract_ben_only.cfg` disables it (`-c` can't: init-time param). Regression test + mutation.
+- [x] Step 2: `predict.py` resumable cache, one row per id (pred, seconds, error) in atomic parquet
+  parts; key = hash(engine config + split sha256) -> new settings/data never reuse rows; errors
+  stored + retried, `""` kept (CER 1). CLI `python -m bangla_ocr.predict tesseract [--limit N]`.
 
 ### Data findings (for the write-up)
 - REID2019 = 3 PAGE schema versions (2013/2016/2018); parse namespace-agnostic.

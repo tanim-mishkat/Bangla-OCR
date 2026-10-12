@@ -7,6 +7,7 @@ from functools import cache
 from pathlib import Path
 
 from bangla_ocr.download import fetch
+from bangla_ocr.predict import Engine
 from bangla_ocr.sources import TESS_BEN
 
 WINDOWS_EXE = Path(r"C:\Program Files\Tesseract-OCR\tesseract.exe")
@@ -58,3 +59,18 @@ def read(png: bytes, psm: int = PSM_LINE) -> str:
     """OCR one image. Output is raw: normalise before scoring, like the labels."""
     out = subprocess.run(command(psm), input=png, capture_output=True, check=True)
     return out.stdout.decode("utf-8").strip()
+
+
+def engine() -> Engine:
+    """Synthetic rows are single lines, REID rows are multi-line regions."""
+    return Engine(
+        name="tesseract",
+        config={
+            "version": version(),
+            "model_sha256": TESS_BEN.sha256,
+            "oem": OEM_LSTM,
+            "psm": {"synth": PSM_LINE, "reid2019": PSM_BLOCK},
+            "extra_config": BEN_ONLY_CONFIG.read_text(encoding="utf-8"),
+        },
+        read=lambda row: read(row["image"], PSM_LINE if row["source"] == "synth" else PSM_BLOCK),
+    )
